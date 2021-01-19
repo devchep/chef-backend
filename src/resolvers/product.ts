@@ -43,6 +43,7 @@ export class ProductResolver {
     if (!product) {
       return null;
     }
+    console.log(price, measure, isActive)
     if (typeof name !== "undefined" && name !== "") {
       product.name = name;
       await em.persistAndFlush(product);
