@@ -30,8 +30,8 @@ class FieldError {
 
 @ObjectType()
 class SupplierResponse {
-  @Field(() => [FieldError], { nullable: true })
-  errors?: [FieldError];
+  @Field(() => FieldError, { nullable: true })
+  errors?: FieldError;
 
   @Field(() => Supplier, { nullable: true })
   supplier?: Supplier;
@@ -56,22 +56,20 @@ export class SupplierResolver {
   ): Promise<SupplierResponse> {
     if (options.userEmail.length <= 3) {
       return {
-        errors: [
+        errors:
           {
             field: "email",
             message: "Длина адреса эл. почты не может быть меньше 3-х символов",
           },
-        ],
       };
     }
     if (options.password.length <= 6) {
       return {
-        errors: [
+        errors:
           {
             field: "password",
             message: "Длина пароля не может быть меньше 6-ти символов",
           },
-        ],
       };
     }
 
@@ -86,12 +84,11 @@ export class SupplierResolver {
       // duplicate email error
       if (err.code === "23505") {
         return {
-          errors: [
+          errors:
             {
               field: "email",
               message: "Введенный адрес эл. почты уже зарегистрирован",
             },
-          ],
         };
       }
     }
@@ -108,12 +105,11 @@ export class SupplierResolver {
     });
     if (!supplier) {
       return {
-        errors: [
+        errors:
           {
             field: "email",
             message: "Не найдено пользователей с введенным адресом эл. почты",
           },
-        ],
       };
     }
 
@@ -123,12 +119,11 @@ export class SupplierResolver {
     );
     if (!validPassword) {
       return {
-        errors: [
+        errors:
           {
             field: "password",
             message: "Неверный пароль",
           },
-        ],
       };
     }
 
