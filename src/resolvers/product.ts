@@ -1,62 +1,91 @@
 import { Product } from "../entities/Product";
+import {
+  Arg,
+  Ctx,
+  Field,
+  InputType,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from "type-graphql";
 import { GraphqlContext } from "src/types";
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { isAuth } from "../middleware/isAuth";
+
+@InputType()
+class CreateProductInput {
+  @Field()
+  name: string;
+  @Field()
+  description: string;
+  @Field()
+  price: number;
+  @Field()
+  measure: string;
+  @Field(() => Int)
+  amount: number;
+  @Field()
+  isActive: boolean;
+}
+
+@InputType()
+class UpdateProductInput {
+  @Field({ nullable: true })
+  name?: string;
+  @Field({ nullable: true })
+  description?: string;
+  @Field({ nullable: true })
+  price?: number;
+  @Field({ nullable: true })
+  measure?: string;
+  @Field({ nullable: true })
+  amount?: number;
+  @Field({ nullable: true })
+  isActive?: boolean;
+}
 
 @Resolver()
 export class ProductResolver {
   @Query(() => [Product])
-  products(@Ctx() { em }: GraphqlContext): Promise<Product[]> {
-    return em.find(Product, {});
+  @UseMiddleware(isAuth)
+  async products(): Promise<Product[]> {
+    return Product.find();
   }
 
   @Query(() => Product, { nullable: true })
-  product(
-    @Arg("id") id: number,
-    @Ctx() { em }: GraphqlContext
-  ): Promise<Product | null> {
-    return em.findOne(Product, { id });
+  @UseMiddleware(isAuth)
+  product(@Arg("id") id: number): Promise<Product | undefined> {
+    return Product.findOne(id);
   }
 
   @Mutation(() => Product)
+  @UseMiddleware(isAuth)
   async createProduct(
-    @Arg("name") name: string,
-    @Arg("price") price: number,
-    @Arg("measure") measure: string,
-    @Arg("isActive") isActive: boolean,
-    @Ctx() { em }: GraphqlContext
+    @Arg("input") input: CreateProductInput,
+    @Ctx() { req }: GraphqlContext
   ): Promise<Product> {
-    const product = em.create(Product, { name, price, measure, isActive });
-    await em.persistAndFlush(product);
-    return product;
+    return Product.create({ ...input, creatorId: req.session.userId }).save();
   }
 
   @Mutation(() => Product)
+  @UseMiddleware(isAuth)
   async updateProduct(
     @Arg("id") id: number,
-    @Arg("name", { nullable: true }) name: string,
-    @Arg("price", { nullable: true }) price: number,
-    @Arg("measure", { nullable: true }) measure: string,
-    @Arg("isActive", { nullable: true }) isActive: boolean,
-    @Ctx() { em }: GraphqlContext
+    @Arg("input") input: UpdateProductInput
   ): Promise<Product | null> {
-    const product = await em.findOne(Product, { id });
+    const product = await Product.findOne(id);
     if (!product) {
       return null;
     }
-    console.log(price, measure, isActive)
-    if (typeof name !== "undefined" && name !== "") {
-      product.name = name;
-      await em.persistAndFlush(product);
-    }
-    return product;
+    console.log(input);
+    Object.assign(product, input);
+    return product.save();
   }
 
   @Mutation(() => Boolean)
-  async deleteProduct(
-    @Arg("id") id: number,
-    @Ctx() { em }: GraphqlContext
-  ): Promise<Boolean> {
-    await em.nativeDelete(Product, { id });
+  async deleteProduct(@Arg("id") id: number): Promise<Boolean> {
+    await Product.delete(id);
     return true;
   }
 }

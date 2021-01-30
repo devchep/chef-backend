@@ -1,7 +1,6 @@
 import "reflect-metadata";
-import { MikroORM } from "@mikro-orm/core";
-import { __prod__ } from "./constants";
-import mikroConfig from "./mikro-orm.config";
+import { createConnection } from "typeorm";
+import { SESSION_COOKIE_NAME, __prod__ } from "./constants";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -12,11 +11,25 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { GraphqlContext } from "./types";
 import cors from "cors";
+import { Supplier } from "./entities/Supplier";
+import { Product } from "./entities/Product";
+import { ActiveCategory } from "./entities/ActiveCategory";
+import { Category } from "./entities/Category";
+import { ActiveCategoryResolver } from "./resolvers/activeCategoryResolver";
+import { CategoryResolver } from "./resolvers/category";
 
 const main = async () => {
-  const orm = await MikroORM.init(mikroConfig);
-  await orm.getMigrator().up();
+  const conn = createConnection({
+    type: "postgres",
+    database: "chefapp",
+    username: "chefuser",
+    password: "3six14mapariaH",
+    logging: true,
+    synchronize: true,
+    entities: [Supplier, Product, Category, ActiveCategory],
+  });
 
+  console.log(conn);
   const app = express();
 
   const RedisStore = connectRedis(session);
@@ -31,7 +44,7 @@ const main = async () => {
 
   app.use(
     session({
-      name: "sid",
+      name: SESSION_COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,
@@ -50,10 +63,10 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [ProductResolver, SupplierResolver],
+      resolvers: [ProductResolver, SupplierResolver, CategoryResolver, ActiveCategoryResolver],
       validate: false,
     }),
-    context: ({ res, req }): GraphqlContext => ({ em: orm.em, res, req }),
+    context: ({ res, req }): GraphqlContext => ({ res, req }),
   });
 
   apolloServer.applyMiddleware({ app, cors: false });

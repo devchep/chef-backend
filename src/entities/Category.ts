@@ -6,50 +6,45 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Category } from "./Category";
-import { Product } from "./Product";
+import { Supplier } from "./Supplier";
 
 @ObjectType()
 @Entity()
-export class Supplier extends BaseEntity {
+export class Category extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @OneToMany(() => Product, (products) => products.creator)
-  products: Product[];
-
-  @ManyToMany(() => Category)
+  @ManyToMany(() => Supplier)
   @JoinTable({
     name: "active_category",
     joinColumn: {
-      name: "supplierId",
-      referencedColumnName: "id",
-    },
-    inverseJoinColumn: {
       name: "categoryId",
       referencedColumnName: "id",
     },
+    inverseJoinColumn: {
+      name: "supplierId",
+      referencedColumnName: "id",
+    },
   })
-  @Field(() => [Category])
-  activeCategories: Promise<Category[]>;
+  @Field(() => [Supplier])
+  activeSuppliers: Promise<Supplier[]>;
 
-  @Field()
+  @Field(() => String)
   @Column({ unique: true })
-  userEmail!: string;
+  name!: string;
 
-  @Column()
-  password!: string;
+  @Column({default: true})
+  isActive!: boolean;
 
-  @Field()
+  @Field(() => String)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(() => String)
   @UpdateDateColumn()
   updatedAt: Date;
 }

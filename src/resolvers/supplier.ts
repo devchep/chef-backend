@@ -1,5 +1,5 @@
 import { Supplier } from "../entities/Supplier";
-import { GraphqlContext } from "src/types";
+import { GraphqlContext } from "../types";
 import {
   Arg,
   Ctx,
@@ -11,6 +11,7 @@ import {
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
+import { SESSION_COOKIE_NAME } from "../constants";
 
 @InputType()
 class SupplierLoginInfo {
@@ -40,55 +41,50 @@ class SupplierResponse {
 @Resolver()
 export class SupplierResolver {
   @Query(() => Supplier, { nullable: true })
-  async me(@Ctx() { em, req }: GraphqlContext) {
+  me(@Ctx() { req }: GraphqlContext) {
     if (!req.session.userId) {
       return null;
     }
-
-    const supplier = await em.findOne(Supplier, { id: req.session.userId });
-    return supplier;
+    return Supplier.findOne(req.session.userId);
   }
 
   @Mutation(() => SupplierResponse)
   async register(
-    @Arg("options") options: SupplierLoginInfo,
-    @Ctx() { em }: GraphqlContext
+    @Arg("options") options: SupplierLoginInfo
   ): Promise<SupplierResponse> {
     if (options.userEmail.length <= 3) {
       return {
-        errors:
-          {
-            field: "email",
-            message: "Длина адреса эл. почты не может быть меньше 3-х символов",
-          },
+        errors: {
+          field: "email",
+          message: "Длина адреса эл. почты не может быть меньше 3-х символов",
+        },
       };
     }
     if (options.password.length <= 6) {
       return {
-        errors:
-          {
-            field: "password",
-            message: "Длина пароля не может быть меньше 6-ти символов",
-          },
+        errors: {
+          field: "password",
+          message: "Длина пароля не может быть меньше 6-ти символов",
+        },
       };
     }
 
     const hashedPassword = await argon2.hash(options.password);
-    const supplier = em.create(Supplier, {
-      userEmail: options.userEmail,
-      password: hashedPassword,
-    });
+    let supplier;
     try {
-      await em.persistAndFlush(supplier);
+      supplier = await Supplier.create({
+        userEmail: options.userEmail,
+        password: hashedPassword,
+      }).save();
     } catch (err) {
+      console.log(err)
       // duplicate email error
       if (err.code === "23505") {
         return {
-          errors:
-            {
-              field: "email",
-              message: "Введенный адрес эл. почты уже зарегистрирован",
-            },
+          errors: {
+            field: "email",
+            message: "Введенный адрес эл. почты уже зарегистрирован",
+          },
         };
       }
     }
@@ -98,18 +94,17 @@ export class SupplierResolver {
   @Mutation(() => SupplierResponse)
   async login(
     @Arg("options") options: SupplierLoginInfo,
-    @Ctx() { em, req }: GraphqlContext
+    @Ctx() { req }: GraphqlContext
   ): Promise<SupplierResponse> {
-    const supplier = await em.findOne(Supplier, {
-      userEmail: options.userEmail,
+    const supplier = await Supplier.findOne({
+      where: { userEmail: options.userEmail },
     });
     if (!supplier) {
       return {
-        errors:
-          {
-            field: "email",
-            message: "Не найдено пользователей с введенным адресом эл. почты",
-          },
+        errors: {
+          field: "email",
+          message: "Не найдено пользователей с введенным адресом эл. почты",
+        },
       };
     }
 
@@ -119,16 +114,31 @@ export class SupplierResolver {
     );
     if (!validPassword) {
       return {
-        errors:
-          {
-            field: "password",
-            message: "Неверный пароль",
-          },
+        errors: {
+          field: "password",
+          message: "Неверный пароль",
+        },
       };
     }
 
     req.session.userId = supplier.id;
 
     return { supplier };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: GraphqlContext) {
+    return new Promise((resolve) =>
+      req.session.destroy((err) => {
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+
+        res.clearCookie(SESSION_COOKIE_NAME);
+        resolve(true);
+      })
+    );
   }
 }

@@ -1,34 +1,66 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import { Field, ObjectType } from "type-graphql";
+import { Field, Float, ID, Int, ObjectType } from "type-graphql";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { Supplier } from "./Supplier";
 
 @ObjectType()
 @Entity()
-export class Product {
-  @Field()
-  @PrimaryKey()
+export class Product extends BaseEntity {
+  @Field(() => ID)
+  @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field(() => String)
-  @Property({ type: "date" })
-  createdAt = new Date();
+  @Field(() => Int)
+  @Column()
+  creatorId: number;
+
+  @ManyToOne(() => Supplier, (supplier) => supplier.products)
+  creator: Supplier;
+
+  // @OneToMany(() => Category, category => category.product)
+  // product: Promise<Category>
+
+  // @Field(() => Category)
+  // async category(
+  //   @Ctx
+  // )
 
   @Field(() => String)
-  @Property({ type: "date", onUpdate: () => new Date() })
-  updatedAt = new Date();
-
-  @Field()
-  @Property()
+  @Column()
   name!: string;
 
-  @Field()
-  @Property()
+  @Field(() => String)
+  @Column()
+  description!: string;
+
+  @Field(() => Float)
+  @Column("float")
   price!: number;
 
-  @Field()
-  @Property()
+  @Field(() => String)
+  @Column()
   measure!: string;
 
-  @Field()
-  @Property()
+  @Field(() => Int)
+  @Column()
+  amount: number;
+
+  @Field(() => Boolean)
+  @Column()
   isActive!: boolean;
+
+  @Field(() => String)
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Field(() => String)
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
