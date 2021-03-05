@@ -49,8 +49,8 @@ class UpdateProductInput {
 export class ProductResolver {
   @Query(() => [Product])
   @UseMiddleware(isAuth)
-  async products(): Promise<Product[]> {
-    return Product.find();
+  async products(@Ctx() { req }: GraphqlContext): Promise<Product[]> {
+    return Product.find({ where: { creatorId: req.session.userId } });
   }
 
   @Query(() => Product, { nullable: true })
@@ -68,24 +68,31 @@ export class ProductResolver {
     return Product.create({ ...input, creatorId: req.session.userId }).save();
   }
 
-  @Mutation(() => Product)
+  @Mutation(() => Product, {nullable: true})
   @UseMiddleware(isAuth)
   async updateProduct(
     @Arg("id") id: number,
-    @Arg("input") input: UpdateProductInput
+    @Arg("input") input: UpdateProductInput,
+    @Ctx() { req }: GraphqlContext
   ): Promise<Product | null> {
-    const product = await Product.findOne(id);
+    const product = await Product.findOne({ id, creatorId: req.session.userId });
     if (!product) {
       return null;
     }
-    console.log(input);
     Object.assign(product, input);
     return product.save();
   }
 
   @Mutation(() => Boolean)
-  async deleteProduct(@Arg("id") id: number): Promise<Boolean> {
-    await Product.delete(id);
+  @UseMiddleware(isAuth)
+  async deleteProduct(
+    @Arg("id") id: number,
+    @Ctx() { req }: GraphqlContext
+  ): Promise<Boolean> {
+    const result = await Product.delete({ id, creatorId: req.session.userId });
+    if (result.affected === 0) {
+      return false;
+    }
     return true;
   }
 }

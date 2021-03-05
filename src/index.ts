@@ -15,8 +15,12 @@ import { Supplier } from "./entities/Supplier";
 import { Product } from "./entities/Product";
 import { ActiveCategory } from "./entities/ActiveCategory";
 import { Category } from "./entities/Category";
-import { ActiveCategoryResolver } from "./resolvers/activeCategoryResolver";
+import { ActiveCategoryResolver } from "./resolvers/activeCategory";
 import { CategoryResolver } from "./resolvers/category";
+import { ActiveSubcategory } from "./entities/ActiveSubcategory";
+import { ProductSubcategory } from "./entities/ProductSubcategory";
+import { Subcategory } from "./entities/Subcategory";
+import { SubcategoryResolver } from "./resolvers/subcategory";
 
 const main = async () => {
   const conn = createConnection({
@@ -26,7 +30,15 @@ const main = async () => {
     password: "3six14mapariaH",
     logging: true,
     synchronize: true,
-    entities: [Supplier, Product, Category, ActiveCategory],
+    entities: [
+      Supplier,
+      Product,
+      Category,
+      Subcategory,
+      ActiveCategory,
+      ActiveSubcategory,
+      ProductSubcategory,
+    ],
   });
 
   console.log(conn);
@@ -63,7 +75,13 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [ProductResolver, SupplierResolver, CategoryResolver, ActiveCategoryResolver],
+      resolvers: [
+        ProductResolver,
+        SupplierResolver,
+        CategoryResolver,
+        SubcategoryResolver,
+        ActiveCategoryResolver,
+      ],
       validate: false,
     }),
     context: ({ res, req }): GraphqlContext => ({ res, req }),

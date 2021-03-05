@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { ActiveSubcategory } from "./ActiveSubcategory";
 import { Category } from "./Category";
 import { Product } from "./Product";
 
@@ -18,7 +19,7 @@ import { Product } from "./Product";
 export class Supplier extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
-  id!: number;
+  id: number;
 
   @OneToMany(() => Product, (products) => products.creator)
   products: Product[];
@@ -37,6 +38,9 @@ export class Supplier extends BaseEntity {
   })
   @Field(() => [Category])
   activeCategories: Promise<Category[]>;
+
+  @OneToMany(() => ActiveSubcategory, (activeSubcategory) => activeSubcategory.supplier)
+  activeSubcategories: ActiveSubcategory[];
 
   @Field()
   @Column({ unique: true })

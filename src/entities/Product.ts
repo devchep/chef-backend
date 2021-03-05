@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { ActiveSubcategory } from "./ActiveSubcategory";
 import { Supplier } from "./Supplier";
 
 @ObjectType()
@@ -19,18 +20,17 @@ export class Product extends BaseEntity {
 
   @Field(() => Int)
   @Column()
-  creatorId: number;
+  creatorId!: number;
 
   @ManyToOne(() => Supplier, (supplier) => supplier.products)
   creator: Supplier;
 
-  // @OneToMany(() => Category, category => category.product)
-  // product: Promise<Category>
+  @Field(() => String)
+  @Column()
+  subcategoryId!: number;
 
-  // @Field(() => Category)
-  // async category(
-  //   @Ctx
-  // )
+  @ManyToOne(() => ActiveSubcategory, (activeSubcategory) => activeSubcategory.products)
+  activeSubcategory: ActiveSubcategory;
 
   @Field(() => String)
   @Column()

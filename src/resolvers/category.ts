@@ -18,4 +18,13 @@ export class CategoryResolver {
   async createCategory(@Arg("input") input: CategoryInput) {
     return await Category.create(input).save();
   }
+
+  @Mutation(() => Boolean)
+  async deleteCategory(@Arg("input") input: CategoryInput): Promise<Boolean> {
+    const result = await Category.delete({ name: input.name });
+    if (result.affected === 0) {
+      return false;
+    }
+    return true;
+  }
 }

@@ -6,9 +6,11 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Subcategory } from "./Subcategory";
 import { Supplier } from "./Supplier";
 
 @ObjectType()
@@ -16,7 +18,7 @@ import { Supplier } from "./Supplier";
 export class Category extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
-  id!: number;
+  id: number;
 
   @ManyToMany(() => Supplier)
   @JoinTable({
@@ -30,21 +32,18 @@ export class Category extends BaseEntity {
       referencedColumnName: "id",
     },
   })
-  @Field(() => [Supplier])
   activeSuppliers: Promise<Supplier[]>;
+
+  @OneToMany(() => Subcategory, (subcategory) => subcategory.category)
+  subcategories: Subcategory[];
 
   @Field(() => String)
   @Column({ unique: true })
   name!: string;
 
-  @Column({default: true})
-  isActive!: boolean;
-
-  @Field(() => String)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(() => String)
   @UpdateDateColumn()
   updatedAt: Date;
 }
