@@ -4,11 +4,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { ActiveSubcategory } from "./ActiveSubcategory";
+import { Subcategory } from "./Subcategory";
 import { Supplier } from "./Supplier";
 
 @ObjectType()
@@ -25,15 +27,24 @@ export class Product extends BaseEntity {
   @ManyToOne(() => Supplier, (supplier) => supplier.products)
   creator: Supplier;
 
-  @Field(() => String)
+  @Field(() => Int)
   @Column()
   subcategoryId!: number;
+  @ManyToOne(() => Subcategory, (subcategory) => subcategory.products)
+  @JoinColumn({ name: "subcategoryId" })
+  subcategory: Subcategory;
 
-  @ManyToOne(() => ActiveSubcategory, (activeSubcategory) => activeSubcategory.products)
+  @Column()
+  activeSubcategoryId!: number
+  @ManyToOne(
+    () => ActiveSubcategory,
+    (activeSubcategory) => activeSubcategory.products
+  )
+  @JoinColumn({ name: "activeSubcategoryId" })
   activeSubcategory: ActiveSubcategory;
 
   @Field(() => String)
-  @Column()
+  @Column({ unique: true })
   name!: string;
 
   @Field(() => String)
@@ -41,7 +52,7 @@ export class Product extends BaseEntity {
   description!: string;
 
   @Field(() => Float)
-  @Column("float")
+  @Column("decimal", { precision: 9, scale: 2 })
   price!: number;
 
   @Field(() => String)
@@ -53,14 +64,12 @@ export class Product extends BaseEntity {
   amount: number;
 
   @Field(() => Boolean)
-  @Column()
-  isActive!: boolean;
+  @Column({ default: true })
+  isShown!: boolean;
 
-  @Field(() => String)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(() => String)
   @UpdateDateColumn()
   updatedAt: Date;
 }

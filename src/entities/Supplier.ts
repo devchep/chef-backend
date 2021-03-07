@@ -4,12 +4,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { ActiveCategory } from "./ActiveCategory";
 import { ActiveSubcategory } from "./ActiveSubcategory";
 import { Category } from "./Category";
 import { Product } from "./Product";
@@ -21,39 +20,39 @@ export class Supplier extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Field(() => [Category], {nullable: true})
+  @OneToMany(() => ActiveCategory, (activeCategory) => activeCategory.supplier)
+  activeCategories: Promise<ActiveCategory[]>;
+  
+  @Field(() => [ActiveSubcategory], {nullable: true})
+  @OneToMany(() => ActiveSubcategory, (activeSubcategory) => activeSubcategory.supplier)
+  activeSubcategories: Promise<ActiveSubcategory[]>;
+  
   @OneToMany(() => Product, (products) => products.creator)
   products: Product[];
-
-  @ManyToMany(() => Category)
-  @JoinTable({
-    name: "active_category",
-    joinColumn: {
-      name: "supplierId",
-      referencedColumnName: "id",
-    },
-    inverseJoinColumn: {
-      name: "categoryId",
-      referencedColumnName: "id",
-    },
-  })
-  @Field(() => [Category])
-  activeCategories: Promise<Category[]>;
-
-  @OneToMany(() => ActiveSubcategory, (activeSubcategory) => activeSubcategory.supplier)
-  activeSubcategories: ActiveSubcategory[];
 
   @Field()
   @Column({ unique: true })
   userEmail!: string;
 
   @Column()
+  INN: string;
+
+  @Column()
+  OGRN: string;
+
+  @Column()
+  docimine: string;
+
+  @Column()
   password!: string;
 
-  @Field()
+  @Column()
+  decimial: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
   @UpdateDateColumn()
   updatedAt: Date;
 }

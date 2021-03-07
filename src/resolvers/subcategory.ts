@@ -1,6 +1,5 @@
 import { Subcategory } from "../entities/Subcategory";
 import { Arg, Field, InputType, Mutation, Query, Resolver } from "type-graphql";
-import { Category } from "../entities/Category";
 
 @InputType()
 class SubcategoryInput {
@@ -13,18 +12,20 @@ class SubcategoryInput {
 @Resolver()
 export class SubcategoryResolver {
   @Query(() => [Subcategory])
-  async subcategories(): Promise<Subcategory[]> {
-    return Subcategory.find();
+  async subcategories(
+    @Arg("categoryId") categoryId: number
+  ): Promise<Subcategory[]> {
+    return Subcategory.find({ where: { categoryId }, relations: ["products"] });
   }
 
   @Mutation(() => Subcategory)
-  async createSubategory(@Arg("input") input: SubcategoryInput) {
+  async createSubcategory(@Arg("input") input: SubcategoryInput) {
     return await Subcategory.create(input).save();
   }
 
   @Mutation(() => Boolean)
-  async deleteCategory(@Arg("id") id: number): Promise<Boolean> {
-    const result = await Category.delete({ id });
+  async deleteSubcategory(@Arg("id") id: number): Promise<Boolean> {
+    const result = await Subcategory.delete({ id });
     if (result.affected === 0) {
       return false;
     }

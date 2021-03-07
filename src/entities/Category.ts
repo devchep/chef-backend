@@ -4,12 +4,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { ActiveCategory } from "./ActiveCategory";
 import { Subcategory } from "./Subcategory";
 import { Supplier } from "./Supplier";
 
@@ -20,20 +19,10 @@ export class Category extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToMany(() => Supplier)
-  @JoinTable({
-    name: "active_category",
-    joinColumn: {
-      name: "categoryId",
-      referencedColumnName: "id",
-    },
-    inverseJoinColumn: {
-      name: "supplierId",
-      referencedColumnName: "id",
-    },
-  })
-  activeSuppliers: Promise<Supplier[]>;
+  @OneToMany(() => ActiveCategory, (activeCategory) => activeCategory.category)
+  activeCategories: Promise<Supplier[]>;
 
+  @Field(() => [Subcategory], {nullable: true})
   @OneToMany(() => Subcategory, (subcategory) => subcategory.category)
   subcategories: Subcategory[];
 

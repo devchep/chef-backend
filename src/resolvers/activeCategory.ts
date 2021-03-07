@@ -1,5 +1,4 @@
 import { ActiveCategory } from "../entities/ActiveCategory";
-import { Category } from "../entities/Category";
 import {
   Arg,
   Ctx,
@@ -11,7 +10,6 @@ import {
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { GraphqlContext } from "src/types";
-import { Supplier } from "../entities/Supplier";
 
 @Resolver()
 export class ActiveCategoryResolver {
@@ -38,14 +36,17 @@ export class ActiveCategoryResolver {
     return true;
   }
 
-  @Query(() => [Category], { nullable: true })
+  @Query(() => [ActiveCategory], { nullable: true })
   @UseMiddleware(isAuth)
   async getActiveCategories(
     @Ctx() { req }: GraphqlContext
-  ): Promise<Category[] | null> {
-    const supplier = await Supplier.findOne(req.session.userId);
-    if (supplier) {
-      return supplier.activeCategories;
+  ): Promise<ActiveCategory[] | null> {
+    const activeCategories = await ActiveCategory.find({
+      where: {supplierId: req.session.userId},
+      relations: ["category", "activeSubcategories", "activeSubcategories.subcategory", "activeSubcategories.products"],
+    });
+    if (activeCategories) {
+      return activeCategories;
     }
     return null;
   }

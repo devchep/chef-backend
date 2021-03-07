@@ -1,25 +1,45 @@
-import { Field, ObjectType } from "type-graphql";
+import { Field, ID, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
   Entity,
   JoinColumn,
-  OneToOne,
-  PrimaryColumn,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { ActiveSubcategory } from "./ActiveSubcategory";
 import { Category } from "./Category";
+import { Supplier } from "./Supplier";
 
 @ObjectType()
 @Entity()
 export class ActiveCategory extends BaseEntity {
-  @PrimaryColumn()
-  supplierId!: number;
+  @Field(() => ID)
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @PrimaryColumn()
+  @Column()
+  supplierId!: number;
+  @ManyToOne(() => Supplier, (supplier) => supplier.activeCategories)
+  @JoinColumn({ name: "supplierId" })
+  supplier: Promise<Supplier>
+
+  @Column()
   categoryId!: number;
+  @Field(() => Category)
+  @JoinColumn({ name: "categoryId" })
+  @ManyToOne(() => Category, (category) => category.activeCategories)
+  category: Category;
+
+  @Field(() => [ActiveSubcategory], { nullable: true })
+  @OneToMany(
+    () => ActiveSubcategory,
+    (activeSubcategory) => activeSubcategory.activeCategory
+  )
+  activeSubcategories: ActiveSubcategory[];
 
   @Field(() => Boolean)
   @Column({ default: true })
-  isActive!: boolean;
+  isShown!: boolean;
 }

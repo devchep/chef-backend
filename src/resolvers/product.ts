@@ -16,6 +16,10 @@ import { isAuth } from "../middleware/isAuth";
 @InputType()
 class CreateProductInput {
   @Field()
+  subcategoryId: number;
+  @Field()
+  activeSubcategoryId: number;
+  @Field()
   name: string;
   @Field()
   description: string;
@@ -25,8 +29,6 @@ class CreateProductInput {
   measure: string;
   @Field(() => Int)
   amount: number;
-  @Field()
-  isActive: boolean;
 }
 
 @InputType()
@@ -42,7 +44,7 @@ class UpdateProductInput {
   @Field({ nullable: true })
   amount?: number;
   @Field({ nullable: true })
-  isActive?: boolean;
+  isShown?: boolean;
 }
 
 @Resolver()
@@ -55,8 +57,11 @@ export class ProductResolver {
 
   @Query(() => Product, { nullable: true })
   @UseMiddleware(isAuth)
-  product(@Arg("id") id: number): Promise<Product | undefined> {
-    return Product.findOne(id);
+  product(
+    @Arg("id") id: number,
+    @Ctx() { req }: GraphqlContext
+  ): Promise<Product | undefined> {
+    return Product.findOne({ id, creatorId: req.session.userId });
   }
 
   @Mutation(() => Product)
@@ -68,14 +73,17 @@ export class ProductResolver {
     return Product.create({ ...input, creatorId: req.session.userId }).save();
   }
 
-  @Mutation(() => Product, {nullable: true})
+  @Mutation(() => Product, { nullable: true })
   @UseMiddleware(isAuth)
   async updateProduct(
     @Arg("id") id: number,
     @Arg("input") input: UpdateProductInput,
     @Ctx() { req }: GraphqlContext
   ): Promise<Product | null> {
-    const product = await Product.findOne({ id, creatorId: req.session.userId });
+    const product = await Product.findOne({
+      id,
+      creatorId: req.session.userId,
+    });
     if (!product) {
       return null;
     }

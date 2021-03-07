@@ -4,12 +4,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { ActiveSubcategory } from "./ActiveSubcategory";
 import { Category } from "./Category";
+import { Product } from "./Product";
 
 @ObjectType()
 @Entity()
@@ -18,15 +21,19 @@ export class Subcategory extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @OneToMany(() => ActiveSubcategory, (activeCategory) => activeCategory.subcategory)
+  activeSubcategories: Promise<ActiveSubcategory[]>;
+
   @Field(() => Int)
   @Column()
   categoryId!: number;
-
   @ManyToOne(() => Category, (category) => category.subcategories)
+  @JoinColumn({ name: "categoryId" })
   category: Category;
 
-  @ManyToOne(() => ActiveSubcategory, (activeSubcategory) => activeSubcategory.subcategory)
-  activeSubcategory: ActiveSubcategory[];
+  @Field(() => [Product], { nullable: true })
+  @OneToMany(() => Product, (products) => products.subcategory)
+  products: Product[];
 
   @Field(() => String)
   @Column({ unique: true })

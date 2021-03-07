@@ -11,7 +11,7 @@ class CategoryInput {
 export class CategoryResolver {
   @Query(() => [Category])
   async categories(): Promise<Category[]> {
-    return Category.find();
+    return Category.find({ relations: ["subcategories"] });
   }
 
   @Mutation(() => Category)
@@ -20,8 +20,8 @@ export class CategoryResolver {
   }
 
   @Mutation(() => Boolean)
-  async deleteCategory(@Arg("input") input: CategoryInput): Promise<Boolean> {
-    const result = await Category.delete({ name: input.name });
+  async deleteCategory(@Arg("id") id: number): Promise<Boolean> {
+    const result = await Category.delete({ id });
     if (result.affected === 0) {
       return false;
     }

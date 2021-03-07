@@ -18,9 +18,9 @@ import { Category } from "./entities/Category";
 import { ActiveCategoryResolver } from "./resolvers/activeCategory";
 import { CategoryResolver } from "./resolvers/category";
 import { ActiveSubcategory } from "./entities/ActiveSubcategory";
-import { ProductSubcategory } from "./entities/ProductSubcategory";
 import { Subcategory } from "./entities/Subcategory";
 import { SubcategoryResolver } from "./resolvers/subcategory";
+import { ActiveSubcategoryResolver } from "./resolvers/activeSubcategory";
 
 const main = async () => {
   const conn = createConnection({
@@ -37,7 +37,6 @@ const main = async () => {
       Subcategory,
       ActiveCategory,
       ActiveSubcategory,
-      ProductSubcategory,
     ],
   });
 
@@ -81,6 +80,7 @@ const main = async () => {
         CategoryResolver,
         SubcategoryResolver,
         ActiveCategoryResolver,
+        ActiveSubcategoryResolver,
       ],
       validate: false,
     }),
