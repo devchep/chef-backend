@@ -11,6 +11,7 @@ import {
 import { ActiveCategory } from "./ActiveCategory";
 import { ActiveSubcategory } from "./ActiveSubcategory";
 import { Category } from "./Category";
+import { Order } from "./Order";
 import { Product } from "./Product";
 
 @ObjectType()
@@ -31,24 +32,28 @@ export class Supplier extends BaseEntity {
   @OneToMany(() => Product, (products) => products.creator)
   products: Product[];
 
+  @Field(() => [Order], { nullable: true })
+  @OneToMany(() => Order, (order) => order.supplier)
+  orders!: Promise<Order[]>;
+
   @Field()
   @Column({ unique: true })
   userEmail!: string;
 
-  @Column()
+  @Field()
+  @Column({nullable: true})
   INN: string;
 
-  @Column()
+  @Field()
+  @Column({nullable: true})
   OGRN: string;
 
-  @Column()
+  @Field()
+  @Column({nullable: true})
   docimine: string;
 
   @Column()
   password!: string;
-
-  @Column()
-  decimial: string;
 
   @CreateDateColumn()
   createdAt: Date;

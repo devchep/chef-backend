@@ -9,9 +9,12 @@ import {
   ObjectType,
   Query,
   Resolver,
+  UseMiddleware,
 } from "type-graphql";
 import argon2 from "argon2";
 import { SESSION_COOKIE_NAME } from "../constants";
+import { isAuth } from "../middleware/isAuth";
+import { Order } from "../entities/Order";
 
 @InputType()
 class SupplierLoginInfo {
@@ -77,7 +80,7 @@ export class SupplierResolver {
         password: hashedPassword,
       }).save();
     } catch (err) {
-      console.log(err)
+      console.log(err);
       // duplicate email error
       if (err.code === "23505") {
         return {
@@ -127,6 +130,7 @@ export class SupplierResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   logout(@Ctx() { req, res }: GraphqlContext) {
     return new Promise((resolve) =>
       req.session.destroy((err) => {
@@ -140,5 +144,18 @@ export class SupplierResolver {
         resolve(true);
       })
     );
+  }
+
+  @Query(() => [Order])
+  @UseMiddleware(isAuth)
+  async getOrders(@Ctx() { req }: GraphqlContext): Promise<Order[] | null> {
+    const orders = await Order.find({
+      where: { supplierId: req.session.userId },
+      relations: ["orderProducts"],
+    });
+    if (orders) {
+      return orders;
+    }
+    return null;
   }
 }

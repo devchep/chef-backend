@@ -11,7 +11,7 @@ class CategoryInput {
 export class CategoryResolver {
   @Query(() => [Category])
   async categories(): Promise<Category[]> {
-    return Category.find({ relations: ["subcategories"] });
+    return Category.find({ relations: ["subcategories", "subcategories.products"] });
   }
 
   @Mutation(() => Category)

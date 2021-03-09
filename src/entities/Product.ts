@@ -6,10 +6,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { ActiveSubcategory } from "./ActiveSubcategory";
+import { OrderProduct } from "./OrderProduct";
 import { Subcategory } from "./Subcategory";
 import { Supplier } from "./Supplier";
 
@@ -42,6 +44,9 @@ export class Product extends BaseEntity {
   )
   @JoinColumn({ name: "activeSubcategoryId" })
   activeSubcategory: ActiveSubcategory;
+
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
+  orderProducts: OrderProduct[];
 
   @Field(() => String)
   @Column({ unique: true })

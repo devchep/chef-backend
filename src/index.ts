@@ -21,6 +21,11 @@ import { ActiveSubcategory } from "./entities/ActiveSubcategory";
 import { Subcategory } from "./entities/Subcategory";
 import { SubcategoryResolver } from "./resolvers/subcategory";
 import { ActiveSubcategoryResolver } from "./resolvers/activeSubcategory";
+import { Order } from "./entities/Order";
+import { OrderProduct } from "./entities/OrderProduct";
+import { Restaurant } from "./entities/Restaurant";
+import { NoSchemaIntrospectionCustomRule } from "graphql";
+import { OrderResolver } from "./resolvers/order";
 
 const main = async () => {
   const conn = createConnection({
@@ -37,6 +42,8 @@ const main = async () => {
       Subcategory,
       ActiveCategory,
       ActiveSubcategory,
+      Order,
+      OrderProduct
     ],
   });
 
@@ -81,6 +88,7 @@ const main = async () => {
         SubcategoryResolver,
         ActiveCategoryResolver,
         ActiveSubcategoryResolver,
+        OrderResolver
       ],
       validate: false,
     }),
