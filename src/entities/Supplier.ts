@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -17,7 +17,7 @@ import { Product } from "./Product";
 @ObjectType()
 @Entity()
 export class Supplier extends BaseEntity {
-  @Field(() => ID)
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -40,15 +40,15 @@ export class Supplier extends BaseEntity {
   @Column({ unique: true })
   userEmail!: string;
 
-  @Field()
+  @Field({nullable: true})
   @Column({nullable: true})
   INN: string;
 
-  @Field()
+  @Field({nullable: true})
   @Column({nullable: true})
   OGRN: string;
 
-  @Field()
+  @Field({nullable: true})
   @Column({nullable: true})
   docimine: string;
 

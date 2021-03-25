@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -15,21 +15,25 @@ import { Supplier } from "./Supplier";
 @ObjectType()
 @Entity()
 export class ActiveCategory extends BaseEntity {
-  @Field(() => ID)
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   supplierId!: number;
-  @ManyToOne(() => Supplier, (supplier) => supplier.activeCategories)
+  @ManyToOne(() => Supplier, (supplier) => supplier.activeCategories, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "supplierId" })
-  supplier: Promise<Supplier>
+  supplier: Promise<Supplier>;
 
   @Column()
   categoryId!: number;
   @Field(() => Category)
   @JoinColumn({ name: "categoryId" })
-  @ManyToOne(() => Category, (category) => category.activeCategories)
+  @ManyToOne(() => Category, (category) => category.activeCategories, {
+    onDelete: "CASCADE",
+  })
   category: Category;
 
   @Field(() => [ActiveSubcategory], { nullable: true })

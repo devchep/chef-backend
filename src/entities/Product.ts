@@ -18,7 +18,7 @@ import { Supplier } from "./Supplier";
 @ObjectType()
 @Entity()
 export class Product extends BaseEntity {
-  @Field(() => ID)
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -26,21 +26,26 @@ export class Product extends BaseEntity {
   @Column()
   creatorId!: number;
 
-  @ManyToOne(() => Supplier, (supplier) => supplier.products)
+  @ManyToOne(() => Supplier, (supplier) => supplier.products, {
+    onDelete: "CASCADE",
+  })
   creator: Supplier;
 
   @Field(() => Int)
   @Column()
   subcategoryId!: number;
-  @ManyToOne(() => Subcategory, (subcategory) => subcategory.products)
+  @ManyToOne(() => Subcategory, (subcategory) => subcategory.products, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "subcategoryId" })
   subcategory: Subcategory;
 
   @Column()
-  activeSubcategoryId!: number
+  activeSubcategoryId!: number;
   @ManyToOne(
     () => ActiveSubcategory,
-    (activeSubcategory) => activeSubcategory.products
+    (activeSubcategory) => activeSubcategory.products,
+    { onDelete: "CASCADE" }
   )
   @JoinColumn({ name: "activeSubcategoryId" })
   activeSubcategory: ActiveSubcategory;

@@ -17,17 +17,22 @@ import { Product } from "./Product";
 @ObjectType()
 @Entity()
 export class Subcategory extends BaseEntity {
-  @Field(() => ID)
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @OneToMany(() => ActiveSubcategory, (activeCategory) => activeCategory.subcategory)
+  @OneToMany(
+    () => ActiveSubcategory,
+    (activeCategory) => activeCategory.subcategory
+  )
   activeSubcategories: Promise<ActiveSubcategory[]>;
 
   @Field(() => Int)
   @Column()
   categoryId!: number;
-  @ManyToOne(() => Category, (category) => category.subcategories)
+  @ManyToOne(() => Category, (category) => category.subcategories, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "categoryId" })
   category: Category;
 

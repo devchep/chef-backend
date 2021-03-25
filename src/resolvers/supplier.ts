@@ -125,6 +125,7 @@ export class SupplierResolver {
     }
 
     req.session.userId = supplier.id;
+    console.log(req.session.cookie)
 
     return { supplier };
   }
@@ -144,18 +145,5 @@ export class SupplierResolver {
         resolve(true);
       })
     );
-  }
-
-  @Query(() => [Order])
-  @UseMiddleware(isAuth)
-  async getOrders(@Ctx() { req }: GraphqlContext): Promise<Order[] | null> {
-    const orders = await Order.find({
-      where: { supplierId: req.session.userId },
-      relations: ["orderProducts"],
-    });
-    if (orders) {
-      return orders;
-    }
-    return null;
   }
 }

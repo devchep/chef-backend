@@ -23,8 +23,6 @@ import { SubcategoryResolver } from "./resolvers/subcategory";
 import { ActiveSubcategoryResolver } from "./resolvers/activeSubcategory";
 import { Order } from "./entities/Order";
 import { OrderProduct } from "./entities/OrderProduct";
-import { Restaurant } from "./entities/Restaurant";
-import { NoSchemaIntrospectionCustomRule } from "graphql";
 import { OrderResolver } from "./resolvers/order";
 
 const main = async () => {
@@ -74,7 +72,7 @@ const main = async () => {
         secure: __prod__, // cookie works only in https
       },
       saveUninitialized: false,
-      secret: "iojnONiebhibiBi090328njbhf",
+      secret: "iojnONiebhibiBi090kk328njbhf",
       resave: false,
     })
   );

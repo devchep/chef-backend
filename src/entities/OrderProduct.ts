@@ -20,7 +20,7 @@ export class OrderProduct extends BaseEntity {
   
   @Column()
   orderId!: number;
-  @ManyToOne(() => Order, (order) => order.orderProducts)
+  @ManyToOne(() => Order, (order) => order.orderProducts, {onDelete:'CASCADE'})
   @JoinColumn({ name: "orderId" })
   order: Promise<Order>
   
@@ -28,7 +28,7 @@ export class OrderProduct extends BaseEntity {
   productId!: number;
   //   @Field(() => [Product], { nullable: true })
   @Field(() => Product)
-  @ManyToOne(() => Product, (product) => product.orderProducts)
+  @ManyToOne(() => Product, (product) => product.orderProducts, {onDelete:'CASCADE'})
   @JoinColumn({ name: "productId" })
   product: Promise<Product>;
 

@@ -34,11 +34,32 @@ export class ActiveSubcategoryResolver {
     @Arg("subcategoryId", () => Int) subcategoryId: number,
     @Ctx() { req }: GraphqlContext
   ) {
-    await ActiveSubcategory.delete({
+    const result = await ActiveSubcategory.delete({
       subcategoryId,
       supplierId: req.session.userId,
     });
+    if (result.affected === 0) {
+      return false;
+    }
     return true;
+  }
+
+  @Mutation(() => ActiveSubcategory)
+  @UseMiddleware(isAuth)
+  async updateActiveSubcategory(
+    @Arg("activeSubcategoryId", () => Int) activeSubcategoryId: number,
+    @Arg("isShown", () => Boolean) isShown: boolean,
+    @Ctx() { req }: GraphqlContext
+  ): Promise<ActiveSubcategory | null> {
+    const activeSubcategory = await ActiveSubcategory.findOne({
+      where: { id: activeSubcategoryId, supplierId: req.session.userId },
+      relations: ["subcategory"],
+    });
+    if (!activeSubcategory) {
+      return null;
+    }
+    activeSubcategory.isShown = isShown;
+    return activeSubcategory.save();
   }
 
   @Query(() => [ActiveSubcategory], { nullable: true })

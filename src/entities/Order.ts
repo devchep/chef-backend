@@ -11,13 +11,12 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { OrderProduct } from "./OrderProduct";
-import { Product } from "./Product";
 import { Supplier } from "./Supplier";
 
 @ObjectType()
 @Entity()
 export class Order extends BaseEntity {
-  @Field(() => ID)
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -28,7 +27,7 @@ export class Order extends BaseEntity {
   @Field(() => Int)
   @Column()
   supplierId!: number;
-  @ManyToOne(() => Supplier, (supplier) => supplier.orders)
+  @ManyToOne(() => Supplier, (supplier) => supplier.orders, {onDelete:'CASCADE'})
   @JoinColumn({ name: "supplierId" })
   supplier: Supplier;
 

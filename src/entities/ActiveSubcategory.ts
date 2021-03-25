@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -16,13 +16,15 @@ import { Supplier } from "./Supplier";
 @ObjectType()
 @Entity()
 export class ActiveSubcategory extends BaseEntity {
-  @Field(() => ID)
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   supplierId!: number;
-  @ManyToOne(() => Supplier, (supplier) => supplier.activeSubcategories)
+  @ManyToOne(() => Supplier, (supplier) => supplier.activeSubcategories, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "supplierId" })
   supplier: Promise<Supplier>;
 
@@ -30,7 +32,8 @@ export class ActiveSubcategory extends BaseEntity {
   activeCategoryId!: number;
   @ManyToOne(
     () => ActiveCategory,
-    (activeCategory) => activeCategory.activeSubcategories
+    (activeCategory) => activeCategory.activeSubcategories,
+    { onDelete: "CASCADE" }
   )
   @JoinColumn({ name: "activeCategoryId" })
   activeCategory: ActiveCategory;
@@ -40,7 +43,8 @@ export class ActiveSubcategory extends BaseEntity {
   @Field(() => Subcategory)
   @ManyToOne(
     () => Subcategory,
-    (subcategory) => subcategory.activeSubcategories
+    (subcategory) => subcategory.activeSubcategories,
+    { onDelete: "CASCADE" }
   )
   subcategory: Subcategory;
 
