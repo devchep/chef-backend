@@ -58,10 +58,13 @@ export class ActiveCategoryResolver {
     @Arg("isShown", () => Boolean) isShown: boolean,
     @Ctx() { req }: GraphqlContext
   ): Promise<ActiveCategory | null> {
-    const activeCategory = await ActiveCategory.findOne({
-      id: activeCategoryId,
-      supplierId: req.session.userId,
-    }, {relations: ["category"]});
+    const activeCategory = await ActiveCategory.findOne(
+      {
+        id: activeCategoryId,
+        supplierId: req.session.userId,
+      },
+      { relations: ["category"] }
+    );
     if (!activeCategory) {
       return null;
     }
@@ -107,5 +110,25 @@ export class ActiveCategoryResolver {
       return activeCategories;
     }
     return null;
+  }
+
+  @Query(() => ActiveCategory, { nullable: true })
+  @UseMiddleware(isAuth)
+  async getActiveCategory(
+    @Arg("categoryId", () => Int) categoryId: number,
+    @Ctx() { req }: GraphqlContext
+  ): Promise<ActiveCategory | null> {
+    const activeCategory = await ActiveCategory.findOne({
+      where: { categoryId, supplierId: req.session.userId },
+      relations: [
+        "category",
+        "activeSubcategories",
+        "activeSubcategories.subcategory",
+      ],
+    });
+    if (!activeCategory) {
+      return null;
+    }
+    return activeCategory;
   }
 }

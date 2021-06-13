@@ -4,6 +4,7 @@ import {
   Ctx,
   Field,
   InputType,
+  Int,
   Mutation,
   ObjectType,
   Query,
@@ -70,12 +71,13 @@ class OrderResponse {
 
 @Resolver()
 export class OrderResolver {
-  @Query(() => [Order])
+  @Query(() => [Order], { nullable: true })
   @UseMiddleware(isAuth)
   async orders(@Ctx() { req }: GraphqlContext): Promise<Order[] | null> {
     const orders = await Order.find({
       where: { supplierId: req.session.userId },
       relations: ["orderProducts"],
+      order: { id: "DESC" },
     });
     if (orders.length === 0) {
       return null;
@@ -142,34 +144,21 @@ export class OrderResolver {
     return { order: await order.save() };
   }
 
-    @Mutation(() => Order, { nullable: true })
-    @UseMiddleware(isAuth)
-    async updateProduct(
-      @Arg("id") id: number,
-      @Arg("input") input: UpdateOrderInput,
-      @Ctx() { req }: GraphqlContext
-    ): Promise<Order | null> {
-      const order = await Order.findOne({
-        id,
-        supplierId: req.session.userId,
-      });
-      if (!order) {
-        return null;
-      }
-      Object.assign(order, input);
-      return order.save();
+  @Mutation(() => Order, { nullable: true })
+  @UseMiddleware(isAuth)
+  async updateOrder(
+    @Arg("id", () => Int) id: number,
+    @Arg("input") input: UpdateOrderInput,
+    @Ctx() { req }: GraphqlContext
+  ): Promise<Order | null> {
+    const order = await Order.findOne({
+      id,
+      supplierId: req.session.userId,
+    });
+    if (!order) {
+      return null;
     }
-
-  //   @Mutation(() => Boolean)
-  //   @UseMiddleware(isAuth)
-  //   async deleteProduct(
-  //     @Arg("id") id: number,
-  //     @Ctx() { req }: GraphqlContext
-  //   ): Promise<Boolean> {
-  //     const result = await Product.delete({ id, creatorId: req.session.userId });
-  //     if (result.affected === 0) {
-  //       return false;
-  //     }
-  //     return true;
-  //   }
+    Object.assign(order, input);
+    return order.save();
+  }
 }

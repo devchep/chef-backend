@@ -20,6 +20,16 @@ export class ActiveSubcategoryResolver {
     @Arg("activeCategoryId", () => Int) activeCategoryId: number,
     @Ctx() { req }: GraphqlContext
   ) {
+    const activeSubcategory = await ActiveSubcategory.findOne({
+      where: {
+        subcategoryId,
+        activeCategoryId,
+        supplierId: req.session.userId,
+      },
+    });
+    if (activeSubcategory) {
+      return;
+    }
     await ActiveSubcategory.create({
       subcategoryId,
       activeCategoryId,
@@ -79,6 +89,22 @@ export class ActiveSubcategoryResolver {
       return activeSubcategory;
     }
     return null;
+  }
+
+  @Query(() => ActiveSubcategory, { nullable: true })
+  @UseMiddleware(isAuth)
+  async getActiveSubcategory(
+    @Arg("subcategoryId", () => Int) subcategoryId: number,
+    @Ctx() { req }: GraphqlContext
+  ): Promise<ActiveSubcategory | null> {
+    const activeSubcategory = await ActiveSubcategory.findOne({
+      where: { subcategoryId, supplierId: req.session.userId, },
+      relations: ["subcategory", "products"],
+    });
+    if (!activeSubcategory) {
+      return null;
+    }
+    return activeSubcategory;
   }
 
   // TODO:

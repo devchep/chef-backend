@@ -1,5 +1,14 @@
 import { Subcategory } from "../entities/Subcategory";
-import { Arg, Field, InputType, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Field,
+  InputType,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+} from "type-graphql";
+import { ActiveSubcategory } from "../entities/ActiveSubcategory";
 
 @InputType()
 class SubcategoryInput {
@@ -13,7 +22,7 @@ class SubcategoryInput {
 export class SubcategoryResolver {
   @Query(() => [Subcategory])
   async subcategories(
-    @Arg("categoryId") categoryId: number
+    @Arg("categoryId", () => Int) categoryId: number
   ): Promise<Subcategory[]> {
     return Subcategory.find({ where: { categoryId }, relations: ["products"] });
   }

@@ -14,7 +14,6 @@ import {
 import argon2 from "argon2";
 import { SESSION_COOKIE_NAME } from "../constants";
 import { isAuth } from "../middleware/isAuth";
-import { Order } from "../entities/Order";
 
 @InputType()
 class SupplierLoginInfo {

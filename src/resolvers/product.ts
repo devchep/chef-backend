@@ -76,7 +76,7 @@ export class ProductResolver {
   @Mutation(() => Product, { nullable: true })
   @UseMiddleware(isAuth)
   async updateProduct(
-    @Arg("id") id: number,
+    @Arg("id", () => Int) id: number,
     @Arg("input") input: UpdateProductInput,
     @Ctx() { req }: GraphqlContext
   ): Promise<Product | null> {
@@ -94,7 +94,7 @@ export class ProductResolver {
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
   async deleteProduct(
-    @Arg("id") id: number,
+    @Arg("id", () => Int) id: number,
     @Ctx() { req }: GraphqlContext
   ): Promise<Boolean> {
     const result = await Product.delete({ id, creatorId: req.session.userId });
